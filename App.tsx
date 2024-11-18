@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, Button, View, Alert } from 'react-native';
 import { Accelerometer, Gyroscope } from 'expo-sensors';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import { LineChart } from 'react-native-chart-kit';
 
 export default function SimonSaysGame() {
@@ -13,10 +10,15 @@ export default function SimonSaysGame() {
   const [shakeDetected, setShakeDetected] = useState(false);
   const [motionDetected, setMotionDetected] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
-  const [gyroscopeData, setGyroscopeData] = useState<any>(null);
 
   // List of possible commands
-  const commands = ["Simon Says Tilt left", "Simon Says Tilt right", "Simon Says Shake", "Simon Says Move up", "Do not Move"];
+  const commands = [
+    "Simon Says Tilt left",
+    "Simon Says Tilt right",
+    "Simon Says Shake",
+    "Simon Says Move up",
+    "Do not Move",
+  ];
 
   // Function to start a new game round
   const startGame = () => {
@@ -36,32 +38,26 @@ export default function SimonSaysGame() {
         if (shake && command === "Simon Says Shake") {
           setShakeDetected(true);
         }
-        
+
         // Detect tilt based on x-axis values
-        if (command === "Simon Says Tilt left" && x < -0.5) {
+        if (command === "Simon Says Tilt left" && x < -0.2) {
           setTiltDetected(true);
-        } else if (command === "Simon Says Tilt right" && x > 0.5) {
+        } else if (command === "Simon Says Tilt right" && x > 0.2) {
           setTiltDetected(true);
         }
-        
-        // Track phone motion path
-        if (command === "Simon Says Move up" && y < -0.5) {
+
+        // Track motion (move up) based on y-axis values
+        if (command === "Simon Says Move up" && y < -0.2) {
           setMotionDetected(true);
         }
-        
+
         // Update motion path for visual representation
-        setPathData(prevData => [...prevData, [x, y, z]]);
+        setPathData((prevData) => [...prevData, [x, y, z]]);
       })
     );
 
-    // Gyroscope for more detailed motion tracking
-    Gyroscope.addListener((data) => {
-      setGyroscopeData(data);
-    });
-
     // Set update interval
     Accelerometer.setUpdateInterval(100);
-    Gyroscope.setUpdateInterval(100);
   };
 
   // Unsubscribe when the component unmounts
@@ -78,7 +74,6 @@ export default function SimonSaysGame() {
   // Simon Says logic
   useEffect(() => {
     if (command && command.startsWith("Simon Says")) {
-      // Check for correct action
       if (tiltDetected || shakeDetected || motionDetected) {
         Alert.alert("Success!", "You followed the command!");
         startGame();
@@ -91,41 +86,33 @@ export default function SimonSaysGame() {
 
   return (
     <View style={styles.container}>
-      <IconSymbol
-        size={310}
-        color="#808080"
-        name="chevron.left.forwardslash.chevron.right"
-        style={styles.headerImage}
-      />
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Simon Says Game</ThemedText>
-      </ThemedView>
-      <ThemedText>{command || "Press Start to Play"}</ThemedText>
+      <Text style={styles.title}>Simon Says Game</Text>
+      <Text style={styles.command}>{command || "Press Start to Play"}</Text>
       <Button title="Start Game" onPress={startGame} />
-      
+
       {/* Display Motion Path */}
       <LineChart
         data={{
           labels: pathData.map((_, index) => index.toString()),
           datasets: [
             {
-              data: pathData.map(point => point[1]), // Only plotting y-axis for simplicity
-            }
-          ]
+              data: pathData.map((point) => point[1]), // Only plotting y-axis for simplicity
+            },
+          ],
         }}
         width={320}
         height={220}
         chartConfig={{
-          backgroundColor: '#f5f5f5',
-          backgroundGradientFrom: '#f5f5f5',
-          backgroundGradientTo: '#ffffff',
+          backgroundColor: "#f5f5f5",
+          backgroundGradientFrom: "#f5f5f5",
+          backgroundGradientTo: "#ffffff",
           color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
-          labelColor: () => '#808080',
+          labelColor: () => "#808080",
           style: { borderRadius: 8 },
           propsForDots: {
-            r: '3',
-            strokeWidth: '1',
-            stroke: '#808080',
+            r: "3",
+            strokeWidth: "1",
+            stroke: "#808080",
           },
         }}
         style={styles.chart}
@@ -137,22 +124,22 @@ export default function SimonSaysGame() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
   },
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  command: {
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: "center",
   },
   chart: {
     marginTop: 20,
     borderRadius: 8,
-  }
+  },
 });
