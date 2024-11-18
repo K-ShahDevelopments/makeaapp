@@ -10,6 +10,7 @@ export default function SimonSaysGame() {
   const [shakeDetected, setShakeDetected] = useState(false);
   const [motionDetected, setMotionDetected] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
+  const [showChart, setShowChart] = useState(false);  // State to control chart visibility
 
   // List of possible commands
   const commands = [
@@ -27,6 +28,7 @@ export default function SimonSaysGame() {
     setShakeDetected(false);
     setMotionDetected(false);
     setPathData([]); // Reset path data for a new round
+    setShowChart(true);  // Show the chart when the game starts
   };
 
   // Function to subscribe to sensor updates
@@ -101,33 +103,35 @@ export default function SimonSaysGame() {
         <Text style={styles.startButtonText}>Start Game</Text>
       </TouchableOpacity>
 
-      {/* Display Motion Path */}
-      <LineChart
-        data={{
-          labels: pathData.map((_, index) => index.toString()),
-          datasets: [
-            {
-              data: pathData.map((point) => point[1]), // Only plotting y-axis for simplicity
+      {/* Display Motion Path Chart after button click */}
+      {showChart && (
+        <LineChart
+          data={{
+            labels: pathData.map((_, index) => index.toString()),
+            datasets: [
+              {
+                data: pathData.map((point) => point[1]), // Only plotting y-axis for simplicity
+              },
+            ],
+          }}
+          width={320}
+          height={220}
+          chartConfig={{
+            backgroundColor: "#1C1C1C",
+            backgroundGradientFrom: "#1C1C1C",
+            backgroundGradientTo: "#333333",
+            color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
+            labelColor: () => "#A8A8A8",
+            style: { borderRadius: 16 },
+            propsForDots: {
+              r: "4",
+              strokeWidth: "2",
+              stroke: "#A8A8A8",
             },
-          ],
-        }}
-        width={320}
-        height={220}
-        chartConfig={{
-          backgroundColor: "#1C1C1C",
-          backgroundGradientFrom: "#1C1C1C",
-          backgroundGradientTo: "#333333",
-          color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
-          labelColor: () => "#A8A8A8",
-          style: { borderRadius: 16 },
-          propsForDots: {
-            r: "4",
-            strokeWidth: "2",
-            stroke: "#A8A8A8",
-          },
-        }}
-        style={styles.chart}
-      />
+          }}
+          style={styles.chart}
+        />
+      )}
     </View>
   );
 }
